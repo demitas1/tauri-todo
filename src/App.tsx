@@ -1,6 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { load, Store } from "@tauri-apps/plugin-store";
 import "./App.css";
+
+const STORE_FILE = "settings.json";
+const MESSAGE_INDEX_KEY = "messageIndex";
 
 const messages = [
   "ToDoアプリケーションへようこそ",
@@ -11,17 +15,38 @@ const messages = [
 ];
 
 function App() {
-  const [message, setMessage] = useState(messages[0]);
+  const [messageIndex, setMessageIndex] = useState(0);
   const [count, setCount] = useState(0);
+  const storeRef = useRef<Store | null>(null);
 
-  // 初期化時にRustからカウンター値を取得
+  // 初期化時にストアとカウンター値を取得
   useEffect(() => {
-    invoke<number>("get_count").then(setCount);
+    const init = async () => {
+      // ストアをロード
+      const store = await load(STORE_FILE);
+      storeRef.current = store;
+
+      // 保存されたインデックスを取得
+      const savedIndex = await store.get<number>(MESSAGE_INDEX_KEY);
+      if (savedIndex !== null && savedIndex !== undefined) {
+        setMessageIndex(savedIndex);
+      }
+
+      // カウンター値を取得
+      const countValue = await invoke<number>("get_count");
+      setCount(countValue);
+    };
+    init();
   }, []);
 
-  const handleRandomMessage = () => {
+  const handleRandomMessage = async () => {
     const randomIndex = Math.floor(Math.random() * messages.length);
-    setMessage(messages[randomIndex]);
+    setMessageIndex(randomIndex);
+
+    // ストアに保存
+    if (storeRef.current) {
+      await storeRef.current.set(MESSAGE_INDEX_KEY, randomIndex);
+    }
   };
 
   // カウンター操作
@@ -56,7 +81,7 @@ function App() {
         {/* メッセージセクション */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <p className="text-gray-600 dark:text-gray-300">
-            {message}
+            {messages[messageIndex]}
           </p>
           <button
             onClick={handleRandomMessage}

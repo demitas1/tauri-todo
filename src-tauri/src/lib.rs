@@ -40,6 +40,7 @@ fn reset(state: State<Mutex<CounterState>>) -> i32 {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_store::Builder::new().build())
         .manage(Mutex::new(CounterState { count: 0 }))
         .invoke_handler(tauri::generate_handler![get_count, increment, decrement, reset])
         .run(tauri::generate_context!())
