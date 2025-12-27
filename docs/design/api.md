@@ -3,7 +3,85 @@
 ## 概要
 
 フロントエンド（React）とバックエンド（Rust）間のインターフェース定義。
-すべてのコマンドは`src-tauri/src/commands.rs`に定義され、`@tauri-apps/api`の`invoke()`で呼び出される。
+コマンドは`src-tauri/src/lib.rs`に定義され、`@tauri-apps/api`の`invoke()`で呼び出される。
+
+## 実装状況
+
+| コマンド | 状態 | 説明 |
+|---------|------|------|
+| get_count | ✅ 実装済み | カウンター値取得 |
+| increment | ✅ 実装済み | カウンター増加 |
+| decrement | ✅ 実装済み | カウンター減少 |
+| reset | ✅ 実装済み | カウンターリセット |
+| get_categories | 📋 計画中 | カテゴリ一覧取得 |
+| create_category | 📋 計画中 | カテゴリ作成 |
+| ... | 📋 計画中 | その他 |
+
+## 実装済みコマンド
+
+### カウンター関連コマンド
+
+#### get_count
+
+カウンター値を取得
+
+**Rust (`src-tauri/src/lib.rs`):**
+```rust
+#[tauri::command]
+fn get_count(db: State<Database>) -> Result<i32, String>
+```
+
+**TypeScript:**
+```typescript
+const count = await invoke<number>('get_count');
+```
+
+#### increment
+
+カウンターを1増加
+
+**Rust:**
+```rust
+#[tauri::command]
+fn increment(db: State<Database>) -> Result<i32, String>
+```
+
+**TypeScript:**
+```typescript
+const newCount = await invoke<number>('increment');
+```
+
+#### decrement
+
+カウンターを1減少
+
+**Rust:**
+```rust
+#[tauri::command]
+fn decrement(db: State<Database>) -> Result<i32, String>
+```
+
+**TypeScript:**
+```typescript
+const newCount = await invoke<number>('decrement');
+```
+
+#### reset
+
+カウンターを0にリセット
+
+**Rust:**
+```rust
+#[tauri::command]
+fn reset(db: State<Database>) -> Result<i32, String>
+```
+
+**TypeScript:**
+```typescript
+const newCount = await invoke<number>('reset');
+```
+
+## 計画中コマンド
 
 ## 型定義
 

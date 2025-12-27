@@ -113,7 +113,7 @@ Tauri 2.x + React 19 + TypeScriptを使用したクロスプラットフォー�
 
 **保存場所:**
 - Tauri API `app_data_dir()` を使用
-- Linux: `~/.local/share/tauri-todo/`
+- Linux: `~/.local/share/com.example.tauri-todo-app/app.db`
 
 ## データフロー
 
@@ -167,15 +167,25 @@ Tauri 2.x + React 19 + TypeScriptを使用したクロスプラットフォー�
 
 ## モジュール間の依存関係
 
+**現在の実装:**
 ```
 main.rs
-  ├── commands.rs
-  │     └── db.rs
-  ├── scheduler.rs
-  │     ├── db.rs
-  │     └── tauri-plugin-notification
-  └── db.rs
-        └── rusqlite
+  └── lib.rs
+        └── db.rs
+              └── rusqlite
+```
+
+**将来の計画:**
+```
+main.rs
+  └── lib.rs
+        ├── commands.rs
+        │     └── db.rs
+        ├── scheduler.rs
+        │     ├── db.rs
+        │     └── tauri-plugin-notification
+        └── db.rs
+              └── rusqlite
 ```
 
 ## 非機能要件
@@ -204,11 +214,12 @@ main.rs
 
 ## 開発フェーズ
 
-### Phase 1: 基盤構築
-1. Tauriプロジェクト初期化
-2. React + Vite + TypeScript セットアップ
-3. Tailwind CSS導入
-4. SQLiteスキーマ作成
+### Phase 1: 基盤構築 ✅ 完了
+1. ✅ Tauriプロジェクト初期化
+2. ✅ React 19 + Vite + TypeScript セットアップ
+3. ✅ Tailwind CSS 4.x 導入
+4. ✅ SQLite基盤構築（rusqlite + counterテーブル）
+5. ✅ カウンター機能の永続化実装
 
 ### Phase 2: コア機能実装
 1. タスクCRUD操作

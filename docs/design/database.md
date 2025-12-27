@@ -5,7 +5,55 @@
 SQLiteを使用したローカルデータベース設計。
 Tauri APIの`app_data_dir()`を使用してプラットフォーム固有のデータディレクトリに配置。
 
-**Linux保存先:** `~/.local/share/tauri-todo/data.db`
+**Linux保存先:** `~/.local/share/com.example.tauri-todo-app/app.db`
+
+## 実装状況
+
+| テーブル | 状態 | 説明 |
+|---------|------|------|
+| counter | ✅ 実装済み | カウンター値の永続化 |
+| categories | 📋 計画中 | カテゴリ管理 |
+| tasks | 📋 計画中 | タスク管理 |
+| reminders | 📋 計画中 | リマインダー設定 |
+| logs | 📋 計画中 | 操作履歴 |
+
+## 実装済みテーブル
+
+### counter テーブル
+
+汎用的なkey-value形式のカウンター管理テーブル
+
+```sql
+CREATE TABLE IF NOT EXISTS counter (
+    key TEXT PRIMARY KEY,
+    value INTEGER NOT NULL DEFAULT 0
+);
+
+-- 初期データ
+INSERT OR IGNORE INTO counter (key, value) VALUES ('main', 0);
+```
+
+**カラム説明:**
+- `key`: カウンターの識別子（主キー）
+- `value`: カウンター値
+
+**Rust実装 (`src-tauri/src/db.rs`):**
+```rust
+pub struct Database {
+    pub conn: Mutex<Connection>,
+}
+
+impl Database {
+    pub fn new(app_data_dir: PathBuf) -> Result<Self>;
+    pub fn get_count(&self) -> Result<i32>;
+    pub fn set_count(&self, value: i32) -> Result<i32>;
+    pub fn increment(&self) -> Result<i32>;
+    pub fn decrement(&self) -> Result<i32>;
+    pub fn reset(&self) -> Result<i32>;
+}
+```
+
+## 計画中テーブル
 
 ## ER図
 

@@ -1,39 +1,30 @@
-use std::sync::Mutex;
-use tauri::State;
+mod db;
 
-// カウンターの状態を管理する構造体
-struct CounterState {
-    count: i32,
+use db::Database;
+use tauri::{Manager, State};
+
+/// カウンターの値を取得
+#[tauri::command]
+fn get_count(db: State<Database>) -> Result<i32, String> {
+    db.get_count().map_err(|e| e.to_string())
 }
 
-// カウンターの値を取得
+/// カウンターを増加
 #[tauri::command]
-fn get_count(state: State<Mutex<CounterState>>) -> i32 {
-    state.lock().unwrap().count
+fn increment(db: State<Database>) -> Result<i32, String> {
+    db.increment().map_err(|e| e.to_string())
 }
 
-// カウンターを増加
+/// カウンターを減少
 #[tauri::command]
-fn increment(state: State<Mutex<CounterState>>) -> i32 {
-    let mut counter = state.lock().unwrap();
-    counter.count += 1;
-    counter.count
+fn decrement(db: State<Database>) -> Result<i32, String> {
+    db.decrement().map_err(|e| e.to_string())
 }
 
-// カウンターを減少
+/// カウンターをリセット
 #[tauri::command]
-fn decrement(state: State<Mutex<CounterState>>) -> i32 {
-    let mut counter = state.lock().unwrap();
-    counter.count -= 1;
-    counter.count
-}
-
-// カウンターをリセット
-#[tauri::command]
-fn reset(state: State<Mutex<CounterState>>) -> i32 {
-    let mut counter = state.lock().unwrap();
-    counter.count = 0;
-    counter.count
+fn reset(db: State<Database>) -> Result<i32, String> {
+    db.reset().map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -41,8 +32,27 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::new().build())
-        .manage(Mutex::new(CounterState { count: 0 }))
-        .invoke_handler(tauri::generate_handler![get_count, increment, decrement, reset])
+        .setup(|app| {
+            // アプリのデータディレクトリを取得
+            let app_data_dir = app
+                .path()
+                .app_data_dir()
+                .expect("アプリデータディレクトリの取得に失敗");
+
+            // データベースを初期化
+            let database = Database::new(app_data_dir)
+                .expect("データベースの初期化に失敗");
+
+            // 状態として管理
+            app.manage(database);
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            get_count,
+            increment,
+            decrement,
+            reset
+        ])
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("アプリケーションの実行中にエラーが発生");
 }
